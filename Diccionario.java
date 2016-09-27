@@ -3,6 +3,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -29,9 +31,9 @@ public class Diccionario {
     public void llenar(String ubicacion){
         ArrayList<String> elementos= new ArrayList<String>();
         ArrayList<Association<String,String> >emparejamientos= new ArrayList<Association<String,String>>();
-        //C√≥digo en la Web
+        //CÛdigo en la Web
         try {
-           //Lectura de archivo, se guardar√° en direcci√≥n. Cambiar la direcci√≥n donde este reside.
+           //Lectura de archivo, se guardar· en direcciÛn. Cambiar la direcciÛn donde este reside.
            direccion = new File (ubicacion);
            fr = new FileReader (direccion);
            br = new BufferedReader(fr);
@@ -55,12 +57,99 @@ public class Diccionario {
               e2.printStackTrace();
            }
         }
+        //termina cÛdigo en internet
+        
+        
+        for(int i=0; i<elementos.size()-1;i++){
+               int posicion=elementos.get(i).indexOf(',');
+               String palabraIngles=elementos.get(i).substring(0,posicion);
+               String palabraEspaÒol=elementos.get(i).substring(posicion+1,elementos.get(i).length());
+               emparejamientos.add(new Association(palabraIngles, palabraEspaÒol));
+        }
+        
+        root.setValue(emparejamientos.get(0));
+        for (int i=1; i<emparejamientos.size(); i++){
+            NuevoNodo(root, emparejamientos.get(i));
+            //System.out.println(emparejamientos);
+        }
+     }
+    
+    public void NuevoNodo(BinaryTree<Association<String,String>> papa, Association<String,String> dato)
+    {
+    	//System.out.println(dato.getKey());
+        Association<String,String> asociacion=papa.value();
+        String llavepapa=asociacion.getKey();
+        String llaveDato=dato.getKey();
+        int num=llavepapa.compareToIgnoreCase(llaveDato);
+        if(num>0 && papa.left()==null){
+        	
+            papa.setLeft(new BinaryTree<Association<String,String>>(null, null, null,null));
+            papa.left().setValue(dato);
+            
+        }else if(papa.left()!=null){
+            
+            NuevoNodo(papa.left(),dato);
+            
+        }
+        
+        if(num<0 && papa.right()==null){
+            
+            papa.setRight(new BinaryTree<Association<String,String>>(null, null, null,null));
+            papa.right().setValue(dato);
+            
+        }else if(papa.right()!=null){
+           
+            NuevoNodo(papa.right(),dato);
+            
+        }
+        
+    }
+    
+    
+    
+     public String Traduccion(BinaryTree<Association<String,String>> papa, String palabra)
+{
+	String palabraTraducida = "";
+	Association<String,String> asociacion=papa.value();
+    String llavepapa=asociacion.getKey();
+    //System.out.println("llave P "+llavepapa);
+    //System.out.println("palabra "+palabra);
+	int num=llavepapa.compareToIgnoreCase(palabra);
+	ArrayList<String> cosas = new ArrayList<String>();
+	int n=0;
+	if(num==0){
+		palabraTraducida=papa.value().getValue();
+		cosas.add(n,palabraTraducida);
+		n=n+1;
+	}
+	if(num<0){
+            if(papa.right()!=null){
+                palabraTraducida=Traduccion(papa.right(),palabra);
+                
+            }else{
+                return ("*"+palabra+"*");
+            }
+	}
+	if(num>0){
+            if(papa.left()!=null){
+                    palabraTraducida=Traduccion(papa.left(),palabra);
+              
+            }else{
+                    return ("*"+palabra+"*");
+            }
 		
-		public void leertexto(String ubicacion2){
+	}
+	for(String nombre : cosas){
+		System.out.println(nombre);
+	}
+	return palabraTraducida;
+    }
+
+    public void leertexto(String ubicacion2){
 	String elementos="";
-	//C√≥digo en la web
+	//CÛdigo en la web
         try {
-        	//Lectura de archivo, se guardar√° en direcci√≥n. Cambiar la direcci√≥n donde este reside.
+        	//Lectura de archivo, se guardar· en direcciÛn. Cambiar la direcciÛn donde este reside.
            direccion = new File (ubicacion2);
            fr = new FileReader (direccion);
            br = new BufferedReader(fr);
@@ -86,4 +175,30 @@ public class Diccionario {
               e2.printStackTrace();
            }
         }
-        //termina c√≥digo de web
+        //termina cÛdigo de web
+
+	while(elementos.compareTo("")!=0){
+	int posicion=elementos.indexOf(' ');
+            if(posicion!=-1){
+                    texto.add(elementos.substring(0,posicion));
+                    elementos=elementos.substring(posicion+1);
+            }else{
+                    texto.add(elementos);
+                    elementos="";
+            }
+        }
+     }
+     
+     
+    public String traducirTexto(){
+        
+        String resultado="";
+        for(int i=0; i<texto.size(); i++){
+                resultado+=Traduccion(root, texto.get(i).trim())+" ";
+        }
+        return resultado;
+    }
+
+
+
+}
